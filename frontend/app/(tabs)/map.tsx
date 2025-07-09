@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import MapView, { Marker, Region } from 'react-native-maps';
 import * as Location from 'expo-location';
-import { Location as LocationType, MarkerData } from './types';
+import { Location as LocationType, MarkerData } from '../types';
 
 const INITIAL_REGION: Region = {
   latitude: 37.78825,
@@ -19,7 +19,7 @@ const INITIAL_REGION: Region = {
   longitudeDelta: 0.0421,
 };
 
-export default function App() {
+export default function MapScreen() {
   const [region, setRegion] = useState<Region>(INITIAL_REGION);
   const [markers, setMarkers] = useState<MarkerData[]>([]);
   const [userLocation, setUserLocation] = useState<LocationType | null>(null);
@@ -97,18 +97,6 @@ export default function App() {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
-      
-      <View style={styles.header}>
-        <Text style={styles.title}>Map App</Text>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={goToUserLocation}>
-            <Text style={styles.buttonText}>My Location</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={clearMarkers}>
-            <Text style={styles.buttonText}>Clear Markers</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
 
       <MapView
         style={styles.map}
@@ -135,6 +123,17 @@ export default function App() {
         <Text style={styles.footerText}>
           Tap on the map to add markers • {markers.length} markers added
         </Text>
+      </View>
+
+      <View style={styles.header}>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity style={styles.button} onPress={goToUserLocation}>
+            <Text style={styles.buttonText}>My Location</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.button} onPress={clearMarkers}>
+            <Text style={styles.buttonText}>Clear Markers</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
