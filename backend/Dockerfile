@@ -15,7 +15,7 @@ RUN poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi --no-root
 
 # Copy the application code
-COPY /app /app
+COPY app/ ./app/
  
 # Set entrypoint
 CMD [ "app.main.handler" ]
