@@ -8,16 +8,26 @@ from app.database.drivers import UsersDriver
 
 class Database():
     
-    async def __init__(self, client: AsyncMongoClient, database: str):
+    def __init__(self, client: AsyncMongoClient, database: str):
         # Create a connection for this class instance
-        self.client = client.aconnect()
+        self.client = client
         self.database = client[database]
 
         # Define drivers that contain database operations
         self.users = UsersDriver(self.database)
         self.journeys = JourneysDriver(self.database)
 
-def database_factory():
+    async def ping(self) -> str:
+        """
+        Ping the database to check if it's reachable.
+        """
+        try:
+            await self.client.admin.command('ping')
+            return "Pong"
+        except Exception as e:
+            raise RuntimeError(f"Database connection failed: {e}")
+
+def get_database() -> Database:
 
     username = os.getenv("MONGO_USERNAME")
     password = os.getenv("MONGO_PASSWORD")
@@ -31,7 +41,7 @@ def database_factory():
     mongo_uri = f"mongodb+srv://{username}:{password}@{host}/?retryWrites=true&w=majority"
 
     client = AsyncMongoClient(mongo_uri)
-    database = Database(client, mongo_uri)
+    database = Database(client, db_name)
     
     return database
 
