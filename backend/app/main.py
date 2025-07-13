@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from mangum import Mangum
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
@@ -31,3 +32,6 @@ if settings.CORS_ORGINS:
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
+
+# Mangum handler for lambda deployment
+handler = Mangum(app)
