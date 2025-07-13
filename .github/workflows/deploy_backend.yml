@@ -2,7 +2,7 @@ name: Build, Push, and Deploy
 
 on:
   push:
-    branches: [ main, 12-backend-deployment ]
+    branches: [ main ]
     paths:
       - 'backend/**'
       - '.github/workflows/deploy_backend.yml'
