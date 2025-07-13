@@ -1,7 +1,10 @@
 #!/bin/bash
+set -e
 
-# Optional: activate virtual environment
-# source venv/bin/activate
+# Load environment variables and export them
+set -a  # automatically export all variables
+source .env
+set +a  # stop automatically exporting
 
 # Set default host and port
 HOST="127.0.0.1"
