@@ -36,6 +36,9 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Navigate to the project directory
+        run: cd backend
+
       - name: Create ECR repository if it doesn't exist
         run: |
           if ! aws ecr describe-repositories --repository-names $REPO_NAME 2>/dev/null; then
