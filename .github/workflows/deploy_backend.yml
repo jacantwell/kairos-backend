@@ -5,7 +5,7 @@ on:
     branches: [ main, 12-backend-deployment ]
     paths:
       - 'backend/**'
-      - '.github/deploy_backend.yml'
+      - '.github/workflows/deploy_backend.yml'
 
 jobs:
   deploy-backend:
