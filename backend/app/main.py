@@ -1,24 +1,36 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from fastapi.routing import APIRoute
 from mangum import Mangum
 from starlette.middleware.cors import CORSMiddleware
 
 from app.api.main import api_router
 from app.core.config import settings
-
-
-def custom_generate_unique_id(route: APIRoute) -> str:
-    return f"{route.tags[0]}-{route.name}"
-
+from app.database import get_database
 
 if settings.ENVIRONMENT != "local":
     # Allow options for only in production
     pass
 
+# In your main app file
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Connect to database
+    print("Connecting to database...")
+    database = get_database()
+    app.state.database = database
+    print("Database connected.")
+    
+    yield
+    
+    # Shutdown
+    database.client.close()
+
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    generate_unique_id_function=custom_generate_unique_id,
+    lifespan=lifespan
 )
 
 # Set all CORS enabled origins
