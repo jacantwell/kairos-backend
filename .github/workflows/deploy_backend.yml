@@ -1,0 +1,79 @@
+name: Build, Push, and Deploy
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy_backend.yml'
+
+jobs:
+  deploy-backend:
+    runs-on: ubuntu-latest
+    
+    env:
+      STACK_NAME: 'kairos-backend'
+      AWS_REGION: 'eu-west-2'
+      AWS_ACCOUNT_ID: '992382417038'
+      REPO_NAME: 'kairos'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set ECR repository URI
+        run: |
+          echo "ECR_REPOSITORY=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$REPO_NAME" >> $GITHUB_ENV
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Navigate to the project directory
+        run: cd backend
+
+      - name: Create ECR repository if it doesn't exist
+        run: |
+          if ! aws ecr describe-repositories --repository-names $REPO_NAME 2>/dev/null; then
+            echo "Creating ECR repository $REPO_NAME"
+            aws ecr create-repository --repository-name $REPO_NAME
+          fi
+
+      - name: Build Docker image
+        run: |
+          cd backend
+          docker build -t $STACK_NAME .
+          docker tag $STACK_NAME $ECR_REPOSITORY:latest
+
+      - name: Push Docker image to ECR
+        run: |
+          cd backend
+          # Push the image
+          docker push $ECR_REPOSITORY:latest
+          
+          # Get image digest reliably using AWS CLI
+          echo "IMAGE_DIGEST=$(aws ecr describe-images --repository-name $REPO_NAME --image-ids imageTag=latest --query 'imageDetails[0].imageDigest' --output text)" >> $GITHUB_ENV
+
+      - name: Deploy to AWS CloudFormation
+        run: |
+          cd backend
+          echo "Deploying stack $STACK_NAME to region $AWS_REGION with image digest $IMAGE_DIGEST"
+          aws cloudformation deploy \
+            --capabilities CAPABILITY_IAM \
+            --stack-name $STACK_NAME \
+            --template-file template.yaml \
+            --region $AWS_REGION \
+            --parameter-overrides \
+              ImageUri="$ECR_REPOSITORY@$IMAGE_DIGEST"
+
+      - name: Get API Gateway URL
+        run: |
+          echo "API Gateway URL:"
+          aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?ExportName=='$STACK_NAME-ApiEndpoint'].OutputValue" --output text
