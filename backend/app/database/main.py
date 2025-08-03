@@ -2,12 +2,11 @@ import os
 
 from pymongo import AsyncMongoClient
 
-from app.database.drivers import JourneysDriver
-from app.database.drivers import UsersDriver
+from app.database.drivers import JourneysDriver, UsersDriver
 
 
-class Database():
-    
+class Database:
+
     def __init__(self, client: AsyncMongoClient, database: str):
         # Create a connection for this class instance
         self.client = client
@@ -22,10 +21,11 @@ class Database():
         Ping the database to check if it's reachable.
         """
         try:
-            await self.client.admin.command('ping')
+            await self.client.admin.command("ping")
             return "Pong"
         except Exception as e:
             raise RuntimeError(f"Database connection failed: {e}")
+
 
 def get_database() -> Database:
 
@@ -38,10 +38,11 @@ def get_database() -> Database:
         raise EnvironmentError("Missing one or more MongoDB environment variables.")
 
     # Build URI for MongoDB Atlas or standalone
-    mongo_uri = f"mongodb+srv://{username}:{password}@{host}/?retryWrites=true&w=majority"
+    mongo_uri = (
+        f"mongodb+srv://{username}:{password}@{host}/?retryWrites=true&w=majority"
+    )
 
     client = AsyncMongoClient(mongo_uri)
     database = Database(client, db_name)
-    
-    return database
 
+    return database
