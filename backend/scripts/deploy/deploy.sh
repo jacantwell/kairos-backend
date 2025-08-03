@@ -24,4 +24,8 @@ aws cloudformation deploy \
   --template-file "${template_path}" \
   --region "${REGION}" \
   --parameter-overrides \
-    ImageUri="${image}"
+    ImageUri="${image}" \
+    MongoUsername="${MONGO_USERNAME}" \
+    MongoPassword="${MONGO_PASSWORD}" \
+    MongoHost="${MONGO_HOST}" \
+    MongoDbName="${MONGO_DB_NAME}" \

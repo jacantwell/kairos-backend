@@ -4,6 +4,18 @@ Parameters:
   ImageUri:
     Type: String
     Description: The URI of the container image including the digest
+  MongoUsername:
+    Type: String
+    Description: MongoDB username
+  MongoPassword:
+    Type: String
+    Description: MongoDB password
+  MongoHost:
+    Type: String
+    Description: MongoDB host
+  MongoDbName:
+    Type: String
+    Description: MongoDB database name
 
 Resources:
   # Lambda Execution Role
@@ -40,6 +52,12 @@ Resources:
       PackageType: Image
       Timeout: 15
       MemorySize: 256
+      Environment:
+        Variables:
+          MONGO_USERNAME: !Ref MongoUsername
+          MONGO_PASSWORD: !Ref MongoPassword
+          MONGO_HOST: !Ref MongoHost
+          MONGO_DB_NAME: !Ref MongoDbName
 
   # API Gateway
   ApiGateway:
