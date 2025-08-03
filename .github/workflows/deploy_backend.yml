@@ -71,7 +71,12 @@ jobs:
             --template-file template.yaml \
             --region $AWS_REGION \
             --parameter-overrides \
-              ImageUri="$ECR_REPOSITORY@$IMAGE_DIGEST"
+              ImageUri="$ECR_REPOSITORY@$IMAGE_DIGEST" \
+              MongoUsername="${{ secrets.MONGO_USERNAME }}" \
+              MongoPassword="${{ secrets.MONGO_PASSWORD }}" \
+              MongoHost="${{ secrets.MONGO_HOST }}" \
+              MongoDbName="${{ secrets.MONGO_DB_NAME }}"
+
 
       - name: Get API Gateway URL
         run: |
