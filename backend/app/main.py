@@ -12,6 +12,7 @@ if settings.ENVIRONMENT != "local":
     # Allow options for only in production
     pass
 
+
 # In your main app file
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -20,17 +21,17 @@ async def lifespan(app: FastAPI):
     database = get_database()
     app.state.database = database
     print("Database connected.")
-    
+
     yield
-    
+
     # Shutdown
-    database.client.close()
+    await database.client.close()
 
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url=f"{settings.API_V1_STR}/openapi.json",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Set all CORS enabled origins

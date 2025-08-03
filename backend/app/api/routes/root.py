@@ -7,18 +7,15 @@ from app.api.deps import DatabaseDep
 router = APIRouter()
 
 
-@router.get(
-    "/"
-)
+@router.get("/")
 def ping() -> Any:
     """
     Retrieve users.
     """
     return "pong"
 
-@router.get(
-    "/mongodb"
-)
+
+@router.get("/mongodb")
 async def ping_mongodb(db: DatabaseDep) -> Any:
     """
     Retrieve users.
