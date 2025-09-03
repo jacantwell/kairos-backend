@@ -1,8 +1,13 @@
-# Backend Developer Guide
+# Kairos Backend
+
+Current deployment -> https://7zpmbpgf7d.execute-api.eu-west-2.amazonaws.com//doc
+
+
+## Backend Developer Guide
 
 This backend is built with **FastAPI**, **Pydantic**, **MongoDB** (via `pymongo`), and managed using **Poetry**. It serves as the API and data layer for the project.
 
-## 🛠️ Tech Stack
+### 🛠️ Tech Stack
 
 - **FastAPI**: Web framework for building APIs
 - **Pydantic**: Data validation and settings management
@@ -11,9 +16,9 @@ This backend is built with **FastAPI**, **Pydantic**, **MongoDB** (via `pymongo`
 - **Uvicorn**: ASGI server for running FastAPI
 - **Poetry**: Dependency and environment management
 
-## 🚀 Getting Started
+### 🚀 Getting Started
 
-### 1. Install Dependencies
+#### 1. Install Dependencies
 
 Make sure you have [Poetry](https://python-poetry.org/docs/#installation) installed.
 
@@ -21,7 +26,7 @@ Make sure you have [Poetry](https://python-poetry.org/docs/#installation) instal
 poetry install
 ```
 
-### 2. Environment Variables
+#### 2. Environment Variables
 
 Copy the example environment file and fill in your MongoDB credentials:
 
@@ -30,7 +35,7 @@ cp .env.example .env
 # Edit .env with your MongoDB details
 ```
 
-### 3. Run the local Development Server
+#### 3. Run the local Development Server
 
 Use the provided script to start the server with hot-reload:
 
@@ -38,7 +43,7 @@ Use the provided script to start the server with hot-reload:
 sh scripts/start_server.sh
 ```
 
-### 4. Project Structure
+#### 4. Project Structure
 
 ```
 kairos/
