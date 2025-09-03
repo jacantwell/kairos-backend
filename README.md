@@ -1,6 +1,6 @@
 # Kairos Backend
 
-Current deployment -> https://7zpmbpgf7d.execute-api.eu-west-2.amazonaws.com//doc
+Current deployment -> https://7zpmbpgf7d.execute-api.eu-west-2.amazonaws.com/docs
 
 
 ## Backend Developer Guide
