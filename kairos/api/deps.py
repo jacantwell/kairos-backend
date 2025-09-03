@@ -5,13 +5,12 @@ from fastapi import Depends, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError
+from kairos.core.config import settings
+from kairos.core.security import ALGORITHM
+from kairos.database import Database
+from kairos.models.security import TokenPayload
+from kairos.models.users import User
 from pydantic import ValidationError
-
-from app.core.config import settings
-from app.core.security import ALGORITHM
-from app.database import Database
-from app.models.security import TokenPayload
-from app.models.users import User
 
 
 async def get_db(request: Request) -> Database:

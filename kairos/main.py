@@ -1,12 +1,11 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from kairos.api.main import api_router
+from kairos.core.config import settings
+from kairos.database import get_database
 from mangum import Mangum
 from starlette.middleware.cors import CORSMiddleware
-
-from app.api.main import api_router
-from app.core.config import settings
-from app.database import get_database
 
 if settings.ENVIRONMENT != "local":
     # Allow options for only in production

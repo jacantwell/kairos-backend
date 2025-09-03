@@ -1,8 +1,7 @@
 from fastapi import APIRouter
-
-from app.api.deps import CurrentUserDep, DatabaseDep
-from app.core.security import get_password_hash
-from app.models.users import User
+from kairos.api.deps import CurrentUserDep, DatabaseDep
+from kairos.core.security import get_password_hash
+from kairos.models.users import User
 
 router = APIRouter(prefix="/users", tags=["users"])
 

@@ -9,4 +9,4 @@ class Token(BaseModel):
 
 # Contents of JWT token
 class TokenPayload(BaseModel):
-    sub: str | None = None
+    sub: str

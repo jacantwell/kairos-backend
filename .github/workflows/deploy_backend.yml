@@ -3,9 +3,6 @@ name: Build, Push, and Deploy
 on:
   push:
     branches: [ main ]
-    paths:
-      - 'backend/**'
-      - '.github/workflows/deploy_backend.yml'
 
 jobs:
   deploy-backend:
@@ -36,9 +33,6 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Navigate to the project directory
-        run: cd backend
-
       - name: Create ECR repository if it doesn't exist
         run: |
           if ! aws ecr describe-repositories --repository-names $REPO_NAME 2>/dev/null; then
@@ -48,13 +42,11 @@ jobs:
 
       - name: Build Docker image
         run: |
-          cd backend
           docker build -t $STACK_NAME .
           docker tag $STACK_NAME $ECR_REPOSITORY:latest
 
       - name: Push Docker image to ECR
         run: |
-          cd backend
           # Push the image
           docker push $ECR_REPOSITORY:latest
           
@@ -63,7 +55,6 @@ jobs:
 
       - name: Deploy to AWS CloudFormation
         run: |
-          cd backend
           echo "Deploying stack $STACK_NAME to region $AWS_REGION with image digest $IMAGE_DIGEST"
           aws cloudformation deploy \
             --capabilities CAPABILITY_IAM \

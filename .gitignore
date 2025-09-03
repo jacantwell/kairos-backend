@@ -1,5 +1,5 @@
 __pycache__
-app.egg-info
+kairos.egg-info
 *.pyc
 .mypy_cache
 .coverage

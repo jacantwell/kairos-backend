@@ -1,8 +1,7 @@
 from typing import Optional
 
+from kairos.models.id import PyObjectId
 from pydantic import BaseModel, Field
-
-from app.models.id import PyObjectId
 
 
 class User(BaseModel):

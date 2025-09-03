@@ -1,7 +1,6 @@
 from bson import ObjectId
+from kairos.models.users import User
 from pymongo.asynchronous.database import AsyncDatabase
-
-from app.models.users import User
 
 
 class UsersDriver:

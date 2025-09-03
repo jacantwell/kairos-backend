@@ -1,8 +1,7 @@
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
-
-from app.api.deps import DatabaseDep
+from kairos.api.deps import DatabaseDep
 
 router = APIRouter()
 

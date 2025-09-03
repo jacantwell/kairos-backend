@@ -1,8 +1,7 @@
 import os
 
+from kairos.database.drivers import JourneysDriver, UsersDriver
 from pymongo import AsyncMongoClient
-
-from app.database.drivers import JourneysDriver, UsersDriver
 
 
 class Database:

@@ -2,11 +2,10 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
-
-from app.api.deps import DatabaseDep
-from app.core.config import settings
-from app.core.security import create_access_token, verify_password
-from app.models.security import Token
+from kairos.api.deps import DatabaseDep
+from kairos.core.config import settings
+from kairos.core.security import create_access_token, verify_password
+from kairos.models.security import Token
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 

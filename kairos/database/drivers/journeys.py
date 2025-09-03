@@ -1,7 +1,6 @@
 from bson import ObjectId
+from kairos.models.journey import Journey
 from pymongo.database import Collection, Database
-
-from app.models.journey import Journey
 
 
 class JourneysDriver:

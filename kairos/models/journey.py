@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import List, Literal, Optional
 
+from kairos.models.id import PyObjectId
 from pydantic import BaseModel, Field, field_validator
-
-from app.models.id import PyObjectId
 
 
 class GeoJsonPoint(BaseModel):

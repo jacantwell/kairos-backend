@@ -15,7 +15,7 @@ RUN poetry config virtualenvs.create false && \
     poetry install --no-interaction --no-ansi --no-root
 
 # Copy the application code
-COPY app/ ./app/
+COPY kairos/ ./kairos/
  
 # Set entrypoint
-CMD [ "app.main.handler" ]
+CMD [ "kairos.main.handler" ]
