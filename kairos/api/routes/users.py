@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from kairos.api.deps import CurrentUserDep, DatabaseDep
 from kairos.core.security import get_password_hash
 from kairos.models.users import User
@@ -11,9 +11,9 @@ async def register_user(db: DatabaseDep, user: User) -> None:
     """
     Register a new user.
     """
-    existing_users = await db.users.query({"username": user.username})
+    existing_users = await db.users.query({"email": user.email})
     if existing_users:
-        return {"error": "Username already exists"}
+        raise HTTPException(status_code=400, detail="Email already registered")
     user.password = get_password_hash(user.password)
     await db.users.create(user)
 
