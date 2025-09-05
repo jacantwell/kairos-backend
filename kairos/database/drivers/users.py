@@ -38,6 +38,13 @@ class UsersDriver:
 
         return User.model_validate(user)
 
+    async def update(self, id: str, user: User) -> None:
+
+        user_data = user.model_dump()
+        user_data.pop("id", None)
+
+        await self.collection.update_one({"_id": ObjectId(id)}, {"$set": user_data})
+
     async def delete(self, id: str) -> None:
 
         await self.collection.delete_one({"_id": ObjectId(id)})
