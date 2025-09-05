@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     MAIL_USERNAME: str = ""
     MAIL_PASSWORD: str = ""
     MAIL_FROM: str = ""
-    MAIL_PORT: int = 0
+    MAIL_PORT: int = 587
     MAIL_SERVER: str = ""
 
     @computed_field
