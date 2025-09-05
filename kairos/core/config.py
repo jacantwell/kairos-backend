@@ -5,7 +5,6 @@ from typing import Literal
 
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from typing_extensions import Self
 
 
 class Settings(BaseSettings):
@@ -19,17 +18,30 @@ class Settings(BaseSettings):
 
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 15
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     CORS_ORGINS: list[str] = ["*"]
 
     PROJECT_NAME: str = "App"
 
+    MAIL_USERNAME: str = ""
+    MAIL_PASSWORD: str = ""
+    MAIL_FROM: str = ""
+    MAIL_PORT: int = 0
+    MAIL_SERVER: str = ""
+
     @computed_field
     @property
     def ACCESS_TOKEN_EXPIRE_DELTA(self) -> timedelta:
         """Convert minutes to timedelta object"""
         return timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+    @computed_field
+    @property
+    def VERIFICATION_TOKEN_EXPIRE_DELTA(self) -> timedelta:
+        """Convert minutes to timedelta object"""
+        return timedelta(minutes=self.VERIFICATION_TOKEN_EXPIRE_MINUTES)
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":
