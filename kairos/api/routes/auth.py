@@ -17,7 +17,7 @@ async def login(
     """
     Authenticate a user and return an access token.
     """
-    found_users = await db.users.query({"username": data.username})
+    found_users = await db.users.query({"email": data.username})
 
     if len(found_users) == 0:
         raise HTTPException(status_code=400, detail="Incorrect username or password")
