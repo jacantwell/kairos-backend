@@ -66,7 +66,12 @@ jobs:
               MongoUsername="${{ secrets.MONGO_USERNAME }}" \
               MongoPassword="${{ secrets.MONGO_PASSWORD }}" \
               MongoHost="${{ secrets.MONGO_HOST }}" \
-              MongoDbName="${{ secrets.MONGO_DB_NAME }}"
+              MongoDbName="${{ secrets.MONGO_DB_NAME }}" \
+              MailUsername="${{ secrets.MAIL_USERNAME }}" \
+              MailPassword="${{ secrets.MAIL_PASSWORD }}" \
+              MailFrom="${{ vars.MAIL_FROM }}" \
+              MailPort="${{ vars.MAIL_PORT }}" \
+              MailServer="${{ vars.MAIL_SERVER }}"
 
 
       - name: Get API Gateway URL

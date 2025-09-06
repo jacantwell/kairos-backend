@@ -29,7 +29,7 @@ async def register_user(db: DatabaseDep, fm: MailDep, user: User) -> None:
     )
 
     # Create email message
-    verification_link = f"http://127.0.0.1:8000/api/v1/users/verify-email?token={token}"
+    verification_link = f"http://localhost:3000/verify?token={token}"
     html_content = f"""
     <p>Thanks for signing up! Please click the link below to verify your email address:</p>
     <a href="{verification_link}">Verify Email</a>
