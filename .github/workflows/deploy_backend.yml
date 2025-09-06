@@ -78,3 +78,32 @@ jobs:
         run: |
           echo "API Gateway URL:"
           aws cloudformation describe-stacks --stack-name $STACK_NAME --query "Stacks[0].Outputs[?ExportName=='$STACK_NAME-ApiEndpoint'].OutputValue" --output text
+
+  dispatch:
+    runs-on: ubuntu-latest
+    needs: deploy-backend
+    steps:
+      - name: Checkout backend repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Get version from pyproject.toml
+        id: get_version
+        run: |
+          VERSION=$(poetry version -s)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Dispatch to client repo
+        run: |
+          curl -X POST \
+            -H "Authorization: token ${{ secrets.KAIROS_API_CLIENT_TS_PAT }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            https://api.github.com/repos/jacantwell/kairos-api-client-ts/dispatches \
+            -d "{\"event_type\": \"update-client\", \"client_payload\": { \"version\": \"${{ steps.get_version.outputs.version }}\" }}"
