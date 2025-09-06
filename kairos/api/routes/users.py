@@ -72,7 +72,7 @@ async def reset_password(db: DatabaseDep, fm: MailDep, email: str):
     if len(users) > 1:
         raise HTTPException(status_code=404, detail="Multiple users found")
     elif len(users) == 0:
-        raise HTTPException(status_code=404, detail="User not found")
+        return
     else:
         user = users[0]
 
