@@ -7,6 +7,7 @@ on:
     paths:
       - 'kairos/api/**'
       - 'kairos/models/**'
+      - '.github/workflows/update_client.yml'
   workflow_dispatch: # allow manual triggering
 
 jobs:
@@ -36,4 +37,4 @@ jobs:
             -H "Authorization: token ${{ secrets.KAIROS_API_CLIENT_TS_PAT }}" \
             -H "Accept: application/vnd.github.v3+json" \
             https://api.github.com/repos/jacantwell/kairos-api-client-ts/dispatches \
-            -d "{\"event_type\": \"build\", \"client_payload\": { \"version\": \"${{ steps.get_version.outputs.version }}\" }}"
+            -d "{\"event_type\": \"update-client\", \"client_payload\": { \"version\": \"${{ steps.get_version.outputs.version }}\" }}"
