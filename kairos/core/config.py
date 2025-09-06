@@ -19,6 +19,7 @@ class Settings(BaseSettings):
     # 60 minutes * 24 hours * 8 days = 8 days
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 15
+    PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 15
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
     CORS_ORGINS: list[str] = ["*"]
@@ -42,6 +43,12 @@ class Settings(BaseSettings):
     def VERIFICATION_TOKEN_EXPIRE_DELTA(self) -> timedelta:
         """Convert minutes to timedelta object"""
         return timedelta(minutes=self.VERIFICATION_TOKEN_EXPIRE_MINUTES)
+
+    @computed_field
+    @property
+    def PASSWORD_RESET_TOKEN_EXPIRE_DELTA(self) -> timedelta:
+        """Convert minutes to timedelta object"""
+        return timedelta(minutes=self.PASSWORD_RESET_TOKEN_EXPIRE_MINUTES)
 
     def _check_default_secret(self, var_name: str, value: str | None) -> None:
         if value == "changethis":

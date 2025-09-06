@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException
 from kairos.api.deps import CurrentUserDep, DatabaseDep, MailDep
 from kairos.core.security import (
     get_password_hash,
-    create_verification_token,
-    decode_verification_token,
+    create_token,
+    decode_token,
 )
 from kairos.models.users import User
 from fastapi_mail import MessageSchema, MessageType
@@ -24,8 +24,8 @@ async def register_user(db: DatabaseDep, fm: MailDep, user: User) -> None:
     await db.users.create(user)
 
     # Generate verification token
-    token = create_verification_token(
-        user.email, settings.VERIFICATION_TOKEN_EXPIRE_DELTA
+    token = create_token(
+        user.email, settings.VERIFICATION_TOKEN_EXPIRE_DELTA, scope="email_verification"
     )
 
     # Create email message
@@ -48,7 +48,7 @@ async def register_user(db: DatabaseDep, fm: MailDep, user: User) -> None:
 @router.get("/verify-email")
 async def verify_email(db: DatabaseDep, token: str):
     try:
-        email = decode_verification_token(token)
+        email = decode_token(token, scope="email_verification")
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -66,6 +66,52 @@ async def verify_email(db: DatabaseDep, token: str):
     user.is_verified = True
     await db.users.update(str(user.id), user)
 
+@router.post("/reset-password")
+async def reset_password(db: DatabaseDep, fm: MailDep, email: str):
+    users = await db.users.query({"email": email})
+    if len(users) > 1:
+        raise HTTPException(status_code=404, detail="Multiple users found")
+    elif len(users) == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    else:
+        user = users[0]
+
+    token = create_token(
+        user.email, settings.PASSWORD_RESET_TOKEN_EXPIRE_DELTA, scope="password_reset")
+
+    # Create email message
+    verification_link = f"http://localhost:3000/reset-password?token={token}"
+    html_content = f"""
+    <p>You have requested to change your password, please click the link below:</p>
+    <a href="{verification_link}">Reset Password</a>
+    """
+    message = MessageSchema(
+        subject="Reset Your Password",
+        recipients=[user.email],
+        body=html_content,
+        subtype=MessageType.html,
+    )
+
+    # Send the email
+    await fm.send_message(message)
+    
+@router.post("/update-password")
+async def update_password(db: DatabaseDep, token: str, new_password: str):
+    try:
+        email = decode_token(token, scope="password_reset")
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    users = await db.users.query({"email": email})
+    if len(users) > 1:
+        raise HTTPException(status_code=404, detail="Multiple users found")
+    if len(users) == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    else:
+        user = users[0]
+
+    user.password = get_password_hash(new_password)
+    await db.users.update(str(user.id), user)
 
 @router.get("/me")
 async def get_current_user(user: CurrentUserDep) -> User:
