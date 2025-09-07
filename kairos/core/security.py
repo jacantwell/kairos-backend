@@ -26,10 +26,10 @@ def decode_token(token: str, scope: Optional[str] = None) -> str:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
         if scope and payload.get("scope") != scope:
             raise jwt.InvalidTokenError("Invalid token scope")
-        email = payload.get("sub")
-        if email is None:
+        subject = payload.get("sub")
+        if subject is None:
             raise jwt.InvalidTokenError("Invalid token")
-        return email
+        return subject
     except jwt.ExpiredSignatureError:
         raise jwt.ExpiredSignatureError("Token has expired")
     except jwt.InvalidTokenError as e:

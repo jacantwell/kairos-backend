@@ -16,8 +16,10 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = secrets.token_urlsafe(32)
 
+
     # 60 minutes * 24 hours * 8 days = 8 days
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     VERIFICATION_TOKEN_EXPIRE_MINUTES: int = 15
     PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 15
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
@@ -37,6 +39,14 @@ class Settings(BaseSettings):
     def ACCESS_TOKEN_EXPIRE_DELTA(self) -> timedelta:
         """Convert minutes to timedelta object"""
         return timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
+
+
+    @computed_field
+    @property
+    def REFRESH_TOKEN_EXPIRE_DELTA(self) -> timedelta:
+        """Convert minutes to timedelta object"""
+        return timedelta(minutes=self.REFRESH_TOKEN_EXPIRE_MINUTES)
+
 
     @computed_field
     @property

@@ -1,18 +1,15 @@
 from typing import Annotated
 
-import jwt
 from fastapi import Depends, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi_mail import FastMail, ConnectionConfig
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from kairos.core.config import settings
-from kairos.core.security import ALGORITHM
+from kairos.core.security import decode_token
 from kairos.database import Database
-from kairos.models.security import TokenPayload
 from kairos.models.users import User
 from pydantic import ValidationError, SecretStr
-from kairos.core.config import settings
 
 
 async def get_db(request: Request) -> Database:
@@ -36,10 +33,10 @@ def get_fm() -> FastMail:
     return FastMail(conf)
 
 
-get_auth = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/token")
 
 DatabaseDep = Annotated[Database, Depends(get_db)]
-TokenDep = Annotated[str, Depends(get_auth)]
+TokenDep = Annotated[str, Depends(oauth2_scheme)]
 MailDep = Annotated[FastMail, Depends(get_fm)]
 
 
@@ -50,14 +47,17 @@ async def get_current_user(db: DatabaseDep, token: TokenDep) -> User:
     If the token is invalid or the user does not exist, an HTTPException is raised.
     """
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
-        token_data = TokenPayload(**payload)
+        sub = decode_token(token)
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Access token has expired"
+        )
     except (InvalidTokenError, ValidationError) as e:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=f"Could not validate credentials: {e}",
         )
-    user = await db.users.read(token_data.sub)
+    user = await db.users.read(sub)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
