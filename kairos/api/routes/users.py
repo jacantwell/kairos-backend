@@ -8,6 +8,7 @@ from kairos.core.security import (
 from kairos.models.users import User
 from fastapi_mail import MessageSchema, MessageType
 from kairos.core.config import settings
+from bson import ObjectId
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -135,5 +136,5 @@ async def get_user_journeys(db: DatabaseDep, user: CurrentUserDep, user_id: str)
     """
     Get journeys for a specific user.
     """
-    journeys = await db.journeys.query({"user_id": user_id})
+    journeys = await db.journeys.query({"user_id": ObjectId(user_id)})
     return journeys

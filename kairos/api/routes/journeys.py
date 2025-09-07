@@ -99,3 +99,8 @@ async def get_nearby_journeys(
     journeys = await db.markers.get_journey_nearby_journeys(journey_id)
 
     return journeys
+
+
+@router.delete("/{joureny_id}")
+async def delete_journey(db: DatabaseDep, user: CurrentUserDep, journey_id):
+    await db.journeys.delete(journey_id)
