@@ -119,3 +119,21 @@ async def get_current_user(user: CurrentUserDep) -> User:
     Get the current authenticated user.
     """
     return user
+
+@router.get("/{user_id}")
+async def get_user_by_id(db: DatabaseDep, user: CurrentUserDep, user_id: str) -> User:
+    """
+    Get a user by ID.
+    """
+    read_user = await db.users.read(user_id)
+    if not read_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    return read_user
+
+@router.get("/{user_id}/journeys")
+async def get_user_journeys(db: DatabaseDep, user: CurrentUserDep, user_id: str):
+    """
+    Get journeys for a specific user.
+    """
+    journeys = await db.journeys.query({"user_id": user_id})
+    return journeys
