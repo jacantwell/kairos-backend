@@ -54,7 +54,7 @@ async def refresh(refresh_token: str):
     new_access = create_token(
         subject=sub,
         expires_delta=settings.ACCESS_TOKEN_EXPIRE_DELTA,
-        scope="access_token",
+        scope="access",
     )
     # TODO Add logic for refresh token rotation as it is more secure
     # this requires keeping a record of blacklisted refresh tokens.
