@@ -1,6 +1,6 @@
 import os
 
-from kairos.database.drivers import JourneysDriver, UsersDriver
+from kairos.database.drivers import JourneysDriver, UsersDriver, MarkersDriver
 from pymongo import AsyncMongoClient
 
 
@@ -14,6 +14,14 @@ class Database:
         # Define drivers that contain database operations
         self.users = UsersDriver(self.database)
         self.journeys = JourneysDriver(self.database)
+        self.markers = MarkersDriver(self.database)
+
+    async def setup_indexes(self):
+        """
+        Set up database indexes. This should be called during app startup.
+        """
+        await self.journeys.create_indexes()
+        await self.markers.create_indexes()
 
     async def ping(self) -> str:
         """
@@ -42,6 +50,7 @@ def get_database() -> Database:
     )
 
     client = AsyncMongoClient(mongo_uri)
+    assert db_name is not None  # I dont know why the if not all doesn't catch this
     database = Database(client, db_name)
 
     return database

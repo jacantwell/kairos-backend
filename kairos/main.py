@@ -18,6 +18,8 @@ async def lifespan(app: FastAPI):
     # Connect to database
     print("Connecting to database...")
     database = get_database()
+    print("Ensuring database indexes exist")
+    await database.setup_indexes()
     app.state.database = database
     print("Database connected.")
 
