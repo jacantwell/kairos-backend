@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from kairos.api.deps import DatabaseDep
+from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from kairos.core.config import settings
 from kairos.core.security import create_token, decode_token, verify_password
 from kairos.models.security import Tokens
@@ -44,7 +45,12 @@ async def login(
 
 @router.post("/refresh")
 async def refresh(refresh_token: str):
-    sub = decode_token(refresh_token, scope="refresh")
+    try:
+        sub = decode_token(refresh_token, scope="refresh")
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Refresh token has expired")
+    except Exception as e:
+        raise HTTPException(status_code=403, detail="Invalid refresh token")
     new_access = create_token(
         subject=sub,
         expires_delta=settings.ACCESS_TOKEN_EXPIRE_DELTA,
