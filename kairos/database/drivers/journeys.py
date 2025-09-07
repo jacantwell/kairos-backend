@@ -1,20 +1,19 @@
 from bson import ObjectId
-from kairos.models.journey import Journey
-from pymongo.database import Collection, Database
+from kairos.models.journeys import Journey
+from pymongo.asynchronous.database import AsyncDatabase
 
 
 class JourneysDriver:
 
-    def __init__(self, database: Database):
-        self.collection: Collection = database["journeys"]
+    def __init__(self, database: AsyncDatabase):
+        self.collection = database["journeys"]
 
-    def _collection_setup(self):
+    async def create_indexes(self):
         """
-        Setup function that defines the collections indexes
+        Create indexes for journey queries
         """
+        await self.collection.create_index([("user_id", 1)])
 
-        self.collection.createIndex({"route_history.coordinates": "2dsphere"})
-        self.collection.createIndex({"planned_route.coordinates": "2dsphere"})
 
     async def create(self, journey: Journey) -> Journey:
 
@@ -23,6 +22,9 @@ class JourneysDriver:
 
         # This allows mongo to generate the objectID
         journey_data.pop("id")
+
+        # Convert user_id to objectID
+        journey_data["user_id"] = ObjectId(journey.user_id)
 
         insertion_result = await self.collection.insert_one(journey_data)
 
@@ -35,6 +37,7 @@ class JourneysDriver:
 
         cursor = self.collection.find(query)
 
+        # Convert cursor to list of Journey objects
         journeys = await cursor.to_list(length=None)
 
         return [Journey.model_validate(journey) for journey in journeys]
@@ -44,6 +47,13 @@ class JourneysDriver:
         journey = await self.collection.find_one({"_id": ObjectId(id)})
 
         return Journey.model_validate(journey)
+
+    async def update(self, id: str, journey: Journey) -> None:
+
+        journey_data = journey.model_dump()
+        journey_data.pop("id", None)
+
+        await self.collection.update_one({"_id": ObjectId(id)}, {"$set": journey_data})
 
     async def delete(self, id: str) -> None:
 

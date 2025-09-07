@@ -1,0 +1,101 @@
+from typing import List
+from fastapi import APIRouter, HTTPException
+from kairos.api.deps import CurrentUserDep, DatabaseDep
+from kairos.models.journeys import Journey
+from kairos.models.markers import Marker
+from bson import ObjectId
+from kairos.models.id import PyObjectId
+
+router = APIRouter(prefix="/journeys", tags=["journeys"])
+
+
+@router.post("/")
+async def create_journey(
+    db: DatabaseDep, user: CurrentUserDep, journey: Journey
+) -> Journey:
+    """
+    Register a new journey.
+    """
+
+    journey = await db.journeys.create(journey)
+
+    return journey
+
+
+@router.get("/{journey_id}")
+async def get_journey(
+    db: DatabaseDep, user: CurrentUserDep, journey_id: str
+) -> Journey:
+    """
+    Get a journey by ID.
+    """
+    journey = await db.journeys.read(journey_id)
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
+    return journey
+
+
+@router.post("/{journey_id}/markers")
+async def add_marker_to_journey(
+    db: DatabaseDep,
+    # user: CurrentUserDep,
+    journey_id: str,
+    marker: Marker,
+) -> Marker:
+    """
+    Add a marker to a journey.
+    """
+    # Ensure the journey exists
+    journey = await db.journeys.read(journey_id)
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
+
+    # Associate marker with journey
+    marker.journey_id = PyObjectId(
+        ObjectId(journey_id)
+    )  # This is messy and may not work
+    created_marker = await db.markers.create(marker)
+
+    return created_marker
+
+
+@router.get("/{journey_id}/markers")
+async def get_journey_markers(
+    db: DatabaseDep,
+    user: CurrentUserDep,
+    journey_id: str,
+) -> List[Marker]:
+    """
+    Get all markers for a journey.
+    """
+    # Ensure the journey exists
+    journey = await db.journeys.read(journey_id)
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
+
+    markers = await db.markers.get_journey_markers(journey_id)
+
+    return markers
+
+
+@router.get("/{journey_id}/journeys/nearby")
+async def get_nearby_journeys(
+    db: DatabaseDep,
+    user: CurrentUserDep,
+    journey_id: str,
+):
+    """
+    Get all journeys with markers near the markers of a given journey.
+    """
+    # Ensure the journey exists and belongs to the user
+    journey = await db.journeys.read(journey_id)
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
+
+    # if journey.user_id != str(user.id):
+    #     raise HTTPException(status_code=403, detail="Access denied")
+
+    # Get journeys
+    journeys = await db.markers.get_journey_nearby_journeys(journey_id)
+
+    return journeys
