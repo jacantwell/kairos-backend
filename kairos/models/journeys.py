@@ -9,6 +9,6 @@ class Journey(BaseModel):
     name: str
     description: str = ""
     user_id: PyObjectId
-    created_at: datetime = Field(default_factory=datetime.now)
+    created_at: datetime = Field(default_factory=datetime.now, )
     active: bool
 
