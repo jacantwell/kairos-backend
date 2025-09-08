@@ -118,3 +118,15 @@ async def toggle_active_journey(
     journey = await db.journeys.read(journey_id)
     journey.active = not journey.active
     await db.journeys.update(journey_id, journey)
+
+
+@router.patch("/{journey_id}")
+async def set_completed_journey(db: DatabaseDep, user: CurrentUserDep, journey_id: str):
+    """
+    Set a journey as completed.
+    If a journey is complete it cannot be active.
+    """
+    journey = await db.journeys.read(journey_id)
+    journey.active = False
+    journey.completed = True
+    await db.journeys.update(journey_id, journey)

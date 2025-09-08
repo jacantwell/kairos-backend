@@ -10,5 +10,6 @@ class Journey(BaseModel):
     description: str = ""
     user_id: PyObjectId
     created_at: datetime = Field(default_factory=datetime.now, )
-    active: bool
+    active: bool = False
+    completed: bool = False
 
