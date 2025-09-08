@@ -102,5 +102,19 @@ async def get_nearby_journeys(
 
 
 @router.delete("/{journey_id}")
-async def delete_journey(db: DatabaseDep, user: CurrentUserDep, journey_id: str):
+async def delete_journey(
+    db: DatabaseDep, user: CurrentUserDep, journey_id: str
+) -> None:
     await db.journeys.delete(journey_id)
+
+
+@router.patch("/{journey_id}/active")
+async def toggle_active_journey(
+    db: DatabaseDep, user: CurrentUserDep, journey_id: str
+) -> None:
+    # This is a the most basic implementation
+    # TODO use a pipeline to just switch the bool
+    # TOTHINK should there be validation of only 1 active journey here?
+    journey = await db.journeys.read(journey_id)
+    journey.active = not journey.active
+    await db.journeys.update(journey_id, journey)
