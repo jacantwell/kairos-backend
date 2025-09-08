@@ -4,6 +4,7 @@ from enum import Enum
 from kairos.models.id import PyObjectId
 from pydantic import BaseModel, Field
 from bson import ObjectId
+from kairos.models.base import MongoModel
 
 
 class Coordinates(BaseModel):
@@ -11,7 +12,7 @@ class Coordinates(BaseModel):
     coordinates: List[float]  # [longitude, latitude]
 
 
-class Marker(BaseModel):
+class Marker(MongoModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     journey_id: PyObjectId
     marker_type: Literal["past", "plan"]

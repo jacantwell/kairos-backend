@@ -20,13 +20,10 @@ class MarkersDriver:
     async def create(self, marker: Marker) -> Marker:
 
         # Convert to dictionary
-        marker_data = marker.model_dump()
+        marker_data = marker.to_mongo()
 
         # This allows mongo to generate the objectID
         marker_data.pop("id")
-
-        # Convert the journey id to an objectID
-        marker_data["journey_id"] = ObjectId(marker.journey_id)
 
         insertion_result = await self.collection.insert_one(marker_data)
 
@@ -52,7 +49,7 @@ class MarkersDriver:
 
     async def update(self, id: str, marker: Marker) -> None:
 
-        marker_data = marker.model_dump()
+        marker_data = marker.to_mongo()
         marker_data.pop("id", None)
 
         await self.collection.update_one({"_id": ObjectId(id)}, {"$set": marker_data})

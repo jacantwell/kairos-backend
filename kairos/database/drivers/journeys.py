@@ -18,13 +18,10 @@ class JourneysDriver:
     async def create(self, journey: Journey) -> Journey:
 
         # Convert to dictionary
-        journey_data = journey.model_dump()
+        journey_data = journey.to_mongo()
 
         # This allows mongo to generate the objectID
         journey_data.pop("id")
-
-        # Convert user_id to objectID
-        journey_data["user_id"] = ObjectId(journey.user_id)
 
         insertion_result = await self.collection.insert_one(journey_data)
 
@@ -50,7 +47,7 @@ class JourneysDriver:
 
     async def update(self, id: str, journey: Journey) -> None:
 
-        journey_data = journey.model_dump()
+        journey_data = journey.to_mongo()
         journey_data.pop("id", None)
 
         await self.collection.update_one({"_id": ObjectId(id)}, {"$set": journey_data})

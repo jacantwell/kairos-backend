@@ -40,7 +40,7 @@ class UsersDriver:
 
     async def update(self, id: str, user: User) -> None:
 
-        user_data = user.model_dump()
+        user_data = user.to_mongo()
         user_data.pop("id", None)
 
         await self.collection.update_one({"_id": ObjectId(id)}, {"$set": user_data})
