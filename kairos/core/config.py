@@ -1,4 +1,4 @@
-import secrets
+import os
 import warnings
 from datetime import timedelta
 from typing import Literal
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
         extra="ignore",
     )
     API_V1_STR: str = "/api/v1"
-    SECRET_KEY: str = secrets.token_urlsafe(32)
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "")
 
 
     # 60 minutes * 24 hours * 8 days = 8 days

@@ -71,7 +71,9 @@ jobs:
               MailPassword="${{ secrets.MAIL_PASSWORD }}" \
               MailFrom="${{ vars.MAIL_FROM }}" \
               MailPort="${{ vars.MAIL_PORT }}" \
-              MailServer="${{ vars.MAIL_SERVER }}"
+              MailServer="${{ vars.MAIL_SERVER }}" \
+              SecretKey="${{ secrets.SECRET_KEY }}"
+
 
 
       - name: Get API Gateway URL
