@@ -14,7 +14,7 @@ class MongoModel(BaseModel):
         This method dynamically finds any fields whose values are ObjectId instances
         and ensures they remain as such, overriding the default string serialization.
         """
-        data = self.model_dump(by_alias=True, **kwargs)
+        data = self.model_dump(**kwargs)
 
         for field_name, field_info in self.__class__.model_fields.items():
             field_value = getattr(self, field_name)
