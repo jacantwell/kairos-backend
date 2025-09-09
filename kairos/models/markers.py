@@ -14,6 +14,7 @@ class Coordinates(BaseModel):
 
 class Marker(MongoModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
+    name: str
     journey_id: PyObjectId
     marker_type: Literal["past", "plan"]
     coordinates: Coordinates
