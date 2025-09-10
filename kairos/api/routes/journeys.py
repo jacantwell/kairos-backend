@@ -51,9 +51,7 @@ async def add_marker_to_journey(
         raise HTTPException(status_code=404, detail="Journey not found")
 
     # Associate marker with journey
-    marker.journey_id = PyObjectId(
-        ObjectId(journey_id)
-    )  # This is messy and may not work
+    # marker.journey_id = journey_id  # This is messy and may not work
     created_marker = await db.markers.create(marker)
 
     return created_marker
