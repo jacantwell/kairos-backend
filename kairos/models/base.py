@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from bson import ObjectId
+from datetime import datetime, date, timezone
 
 
 class MongoModel(BaseModel):
@@ -22,5 +23,9 @@ class MongoModel(BaseModel):
             if isinstance(field_value, ObjectId):
                 dict_key = field_info.alias or field_name
                 data[dict_key] = field_value
+
+            if isinstance(field_value, date):
+                dict_key = field_info.alias or field_name
+                data[dict_key] = datetime.combine(field_value, datetime.min.time(), tzinfo=timezone.utc)
 
         return data
