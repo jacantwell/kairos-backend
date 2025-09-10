@@ -5,6 +5,7 @@ from kairos.models.id import PyObjectId
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from kairos.models.base import MongoModel
+from datetime import date
 
 
 class Coordinates(BaseModel):
@@ -18,7 +19,7 @@ class Marker(MongoModel):
     journey_id: PyObjectId
     marker_type: Literal["past", "plan"]
     coordinates: Coordinates
-    timestamp: Optional[datetime] = None  # for journey markers
-    estimated_time: Optional[str] = None  # for plan markers
+    timestamp: Optional[date] = None  # for journey markers
+    estimated_time: Optional[date] = None  # for plan markers
     notes: str = ""
     created_at: datetime = Field(default_factory=datetime.now)
