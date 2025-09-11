@@ -75,6 +75,22 @@ async def get_journey_markers(
 
     return markers
 
+@router.delete("/{journey_id}/markers/{marker_id}")
+async def delete_journey_marker(
+    db: DatabaseDep,
+    user: CurrentUserDep,
+    journey_id: str,
+    marker_id: str,
+) -> None:
+    """
+    Delete a marker from a journey.
+    """
+    # Ensure the journey exists
+    journey = await db.journeys.read(journey_id)
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
+
+    await db.markers.delete(marker_id)
 
 @router.get("/{journey_id}/journeys/nearby")
 async def get_nearby_journeys(
