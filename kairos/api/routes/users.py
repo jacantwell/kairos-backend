@@ -30,7 +30,7 @@ async def register_user(db: DatabaseDep, fm: MailDep, user: User) -> None:
     )
 
     # Create email message
-    verification_link = f"http://localhost:3000/verify?token={token}"
+    verification_link = f"http://findkairos/verify?token={token}"
     html_content = f"""
     <p>Thanks for signing up! Please click the link below to verify your email address:</p>
     <a href="{verification_link}">Verify Email</a>
@@ -81,7 +81,7 @@ async def reset_password(db: DatabaseDep, fm: MailDep, email: str):
         user.email, settings.PASSWORD_RESET_TOKEN_EXPIRE_DELTA, scope="password_reset")
 
     # Create email message
-    verification_link = f"http://localhost:3000/reset-password?token={token}"
+    verification_link = f"http://findkairos/reset-password?token={token}"
     html_content = f"""
     <p>You have requested to change your password, please click the link below:</p>
     <a href="{verification_link}">Reset Password</a>
