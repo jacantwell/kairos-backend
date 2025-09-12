@@ -100,7 +100,7 @@ class MarkersDriver:
         results = await cursor.to_list(length=50)
         return [result["_id"] for result in results]
     
-    async def get_journey_nearby_journeys(self, journey_id: str, max_distance_meters: int = 10000) -> List[str]:
+    async def get_journey_nearby_journeys(self, journey_id: str, max_distance_meters: int = 500000) -> List[str]:
         """
         Find journey IDs that have markers near any marker in the given journey
         Returns list of journey IDs
