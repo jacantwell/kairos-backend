@@ -64,7 +64,7 @@ class MarkersDriver:
         markers =  await cursor.to_list(length=None)
         return [Marker.model_validate(marker) for marker in markers]
     
-    async def get_coordinates_nearby_journeys(self, coordinates: List[float], max_distance_meters: int = 10000) -> List[str]:
+    async def get_coordinates_nearby_journeys(self, coordinates: List[float], max_distance_meters: int = 100000) -> List[str]:
         """
         Find journey IDs that have markers near the given coordinates
         coordinates: [longitude, latitude]
