@@ -68,10 +68,6 @@ jobs:
               MongoHost="${{ secrets.MONGO_HOST }}" \
               MongoDbName="${{ secrets.MONGO_DB_NAME }}" \
               MailUsername="${{ secrets.MAIL_USERNAME }}" \
-              MailPassword="${{ secrets.MAIL_PASSWORD }}" \
-              MailFrom="${{ vars.MAIL_FROM }}" \
-              MailPort="${{ vars.MAIL_PORT }}" \
-              MailServer="${{ vars.MAIL_SERVER }}" \
               ResendApiKey="${{ secrets.RESEND_API_KEY }}" \
               SecretKey="${{ secrets.SECRET_KEY }}"
 

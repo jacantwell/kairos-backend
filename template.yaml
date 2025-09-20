@@ -19,18 +19,6 @@ Parameters:
   MailUsername:
     Type: String
     Description: Email service username
-  MailPassword:
-    Type: String
-    Description: Email service password
-  MailFrom:
-    Type: String
-    Description: Email sender address
-  MailPort:
-    Type: Number
-    Description: Email service SMTP port
-  MailServer:
-    Type: String
-    Description: Email service SMTP server
   ResendApiKey:
     Type: String
     Description: Resend API key for sending emails
@@ -81,10 +69,6 @@ Resources:
           MONGO_HOST: !Ref MongoHost
           MONGO_DB_NAME: !Ref MongoDbName
           MAIL_USERNAME: !Ref MailUsername
-          MAIL_PASSWORD: !Ref MailPassword
-          MAIL_FROM: !Ref MailFrom
-          MAIL_PORT: !Ref MailPort
-          MAIL_SERVER: !Ref MailServer
           RESEND_API_KEY: !Ref ResendApiKey
           SECRET_KEY: !Ref SecretKey
 
