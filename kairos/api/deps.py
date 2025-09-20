@@ -2,7 +2,6 @@ from typing import Annotated
 
 from fastapi import Depends, Request, status
 from fastapi.exceptions import HTTPException
-from fastapi_mail import FastMail, ConnectionConfig
 from fastapi.security import OAuth2PasswordBearer
 from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from kairos.core.config import settings

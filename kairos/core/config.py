@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     PASSWORD_RESET_TOKEN_EXPIRE_MINUTES: int = 15
     ENVIRONMENT: Literal["local", "staging", "production"] = "local"
 
-    CORS_ORGINS: list[str] = ["*"]
+    CORS_ORIGINS: list[str] = ["*"]
 
     PROJECT_NAME: str = "App"
 
