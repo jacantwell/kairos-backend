@@ -137,3 +137,28 @@ async def get_user_journeys(db: DatabaseDep, user: CurrentUserDep, user_id: str)
     """
     journeys = await db.journeys.query({"user_id": ObjectId(user_id)})
     return journeys
+
+@router.put("/{user_id}")
+async def update_user(db: DatabaseDep, user: CurrentUserDep, user_id: str, updated_user: User):
+    """
+    Update a user by ID.
+    """
+    read_user = await db.users.read(user_id)
+    if not read_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    updated_user.id = read_user.id  # Ensure the ID remains the same
+    if updated_user.password != read_user.password:
+        raise HTTPException(status_code=400, detail="Password cannot be changed here.")
+    await db.users.update(user_id, updated_user)
+    return updated_user
+
+@router.delete("/{user_id}")
+async def delete_user(db: DatabaseDep, user: CurrentUserDep, user_id: str):
+    """
+    Delete a user by ID.
+    """
+    read_user = await db.users.read(user_id)
+    if not read_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    await db.users.delete(user_id)
+    return {"message": "User deleted successfully."}

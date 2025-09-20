@@ -11,5 +11,6 @@ class User(MongoModel):
     name: str
     password: str
     phonenumber: Optional[str] = None
+    instagram: Optional[str] = None
     country: Optional[str] = None
     is_verified: bool = False
