@@ -1,6 +1,6 @@
 [project]
 name = "kairos"
-version = "0.5.2"
+version = "0.6.0"
 description = ""
 authors = [
     {name = "Jasper Cantwell",email = "jasper66018@gmail.com"}

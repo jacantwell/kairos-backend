@@ -38,7 +38,7 @@ async def get_journey(
 @router.post("/{journey_id}/markers")
 async def add_marker_to_journey(
     db: DatabaseDep,
-    # user: CurrentUserDep,
+    user: CurrentUserDep,
     journey_id: str,
     marker: Marker,
 ) -> Marker:
@@ -50,8 +50,8 @@ async def add_marker_to_journey(
     if not journey:
         raise HTTPException(status_code=404, detail="Journey not found")
 
-    # Associate marker with journey
-    # marker.journey_id = journey_id  # This is messy and may not work
+    # Associate marker with the user
+    marker.owner_id = user.id
     created_marker = await db.markers.create(marker)
 
     return created_marker

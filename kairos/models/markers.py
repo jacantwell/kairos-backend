@@ -17,6 +17,7 @@ class Marker(MongoModel):
     id: Optional[PyObjectId] = Field(alias="_id", default=None)
     name: str
     journey_id: PyObjectId
+    owner_id: Optional[PyObjectId] = None
     marker_type: Literal["past", "plan"]
     coordinates: Coordinates
     timestamp: Optional[date] = None  # for journey markers
