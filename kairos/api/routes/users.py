@@ -1,20 +1,20 @@
 from fastapi import APIRouter, HTTPException
-from kairos.api.deps import CurrentUserDep, DatabaseDep, MailDep
+from kairos.api.deps import CurrentUserDep, DatabaseDep
 from kairos.core.security import (
     get_password_hash,
     create_token,
     decode_token,
 )
 from kairos.models.users import User
-from fastapi_mail import MessageSchema, MessageType
 from kairos.core.config import settings
 from bson import ObjectId
+import resend
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.post("/register")
-async def register_user(db: DatabaseDep, fm: MailDep, user: User) -> None:
+async def register_user(db: DatabaseDep, user: User) -> None:
     """
     Register a new user.
     """
@@ -30,20 +30,19 @@ async def register_user(db: DatabaseDep, fm: MailDep, user: User) -> None:
     )
 
     # Create email message
-    verification_link = f"http://findkairos/verify?token={token}"
+    verification_link = f"http://www.findkairos.com/verify?token={token}"
     html_content = f"""
     <p>Thanks for signing up! Please click the link below to verify your email address:</p>
     <a href="{verification_link}">Verify Email</a>
     """
-    message = MessageSchema(
-        subject="Verify Your Email Address",
-        recipients=[user.email],
-        body=html_content,
-        subtype=MessageType.html,
-    )
+    email_content: resend.Emails.SendParams = {
+    "from": "Kairos <verify@send.findkairos.com>",
+    "to": [user.email],
+    "subject": "Verify Your Email Address",
+    "html": html_content,
+    }
 
-    # Send the email
-    await fm.send_message(message)
+    resend.Emails.send(email_content)
 
 
 @router.get("/verify-email")
@@ -68,7 +67,7 @@ async def verify_email(db: DatabaseDep, token: str):
     await db.users.update(str(user.id), user)
 
 @router.post("/reset-password")
-async def reset_password(db: DatabaseDep, fm: MailDep, email: str):
+async def reset_password(db: DatabaseDep, email: str):
     users = await db.users.query({"email": email})
     if len(users) > 1:
         raise HTTPException(status_code=404, detail="Multiple users found")
@@ -81,20 +80,20 @@ async def reset_password(db: DatabaseDep, fm: MailDep, email: str):
         user.email, settings.PASSWORD_RESET_TOKEN_EXPIRE_DELTA, scope="password_reset")
 
     # Create email message
-    verification_link = f"http://findkairos/reset-password?token={token}"
+    verification_link = f"http://www.findkairos.com/reset-password?token={token}"
     html_content = f"""
     <p>You have requested to change your password, please click the link below:</p>
     <a href="{verification_link}">Reset Password</a>
     """
-    message = MessageSchema(
-        subject="Reset Your Password",
-        recipients=[user.email],
-        body=html_content,
-        subtype=MessageType.html,
-    )
 
-    # Send the email
-    await fm.send_message(message)
+    email_content: resend.Emails.SendParams = {
+    "from": "Kairos <reset@send.findkairos.com>",
+    "to": [user.email],
+    "subject": "Verify Your Email Address",
+    "html": html_content,
+    }
+
+    resend.Emails.send(email_content)
     
 @router.post("/update-password")
 async def update_password(db: DatabaseDep, token: str, new_password: str):

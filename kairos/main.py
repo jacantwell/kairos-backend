@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 
+import resend
 from fastapi import FastAPI
 from kairos.api.main import api_router
 from kairos.core.config import settings
@@ -22,6 +23,10 @@ async def lifespan(app: FastAPI):
     await database.setup_indexes()
     app.state.database = database
     print("Database connected.")
+
+    # Configure email server API key
+    print("Configuring email server...")
+    resend.api_key = settings.RESEND_API_KEY
 
     yield
 

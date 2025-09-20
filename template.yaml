@@ -31,9 +31,13 @@ Parameters:
   MailServer:
     Type: String
     Description: Email service SMTP server
+  ResendApiKey:
+    Type: String
+    Description: Resend API key for sending emails
   SecretKey:
     Type: String
     Description: Secret key for JWT tokens
+  
 
 Resources:
   # Lambda Execution Role
@@ -81,7 +85,9 @@ Resources:
           MAIL_FROM: !Ref MailFrom
           MAIL_PORT: !Ref MailPort
           MAIL_SERVER: !Ref MailServer
+          RESEND_API_KEY: !Ref ResendApiKey
           SECRET_KEY: !Ref SecretKey
+
 
   # API Gateway
   ApiGateway:

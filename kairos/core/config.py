@@ -28,11 +28,13 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "App"
 
-    MAIL_USERNAME: str = ""
+    MAIL_USERNAME: str = "resend"
     MAIL_PASSWORD: str = ""
-    MAIL_FROM: str = ""
+    MAIL_FROM: str = "send.findkairos.com"
     MAIL_PORT: int = 587
-    MAIL_SERVER: str = ""
+    MAIL_SERVER: str = "smtp.resend.com"
+
+    RESEND_API_KEY: str = ""
 
     @computed_field
     @property
