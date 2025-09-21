@@ -138,6 +138,16 @@ async def get_user_journeys(db: DatabaseDep, user: CurrentUserDep, user_id: str)
     journeys = await db.journeys.query({"user_id": ObjectId(user_id)})
     return journeys
 
+@router.get("/{user_id}/journeys/active")
+async def get_active_journey(db: DatabaseDep, user: CurrentUserDep, user_id: str):
+    """
+    Get the active journey for a specific user.
+    """
+    journeys = await db.journeys.query({"user_id": ObjectId(user_id), "active": True})
+    if not journeys:
+        raise HTTPException(status_code=404, detail="No active journey found")
+    return journeys[0]
+
 @router.put("/{user_id}")
 async def update_user(db: DatabaseDep, user: CurrentUserDep, user_id: str, updated_user: User):
     """
