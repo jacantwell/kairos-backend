@@ -16,7 +16,6 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     SECRET_KEY: str = os.getenv("SECRET_KEY", "")
 
-
     # 60 minutes * 24 hours * 8 days = 8 days
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 8
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
@@ -41,13 +40,11 @@ class Settings(BaseSettings):
         """Convert minutes to timedelta object"""
         return timedelta(minutes=self.ACCESS_TOKEN_EXPIRE_MINUTES)
 
-
     @computed_field
     @property
     def REFRESH_TOKEN_EXPIRE_DELTA(self) -> timedelta:
         """Convert minutes to timedelta object"""
         return timedelta(minutes=self.REFRESH_TOKEN_EXPIRE_MINUTES)
-
 
     @computed_field
     @property

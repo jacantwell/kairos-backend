@@ -11,7 +11,9 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ALGORITHM = "HS256"
 
 
-def create_token(subject: str | Any, expires_delta: timedelta, scope: Optional[str] = None) -> str:
+def create_token(
+    subject: str | Any, expires_delta: timedelta, scope: Optional[str] = None
+) -> str:
     """Creates a JWT token with an expiration time."""
     expire = datetime.now(timezone.utc) + expires_delta
     to_encode = {"exp": expire, "sub": str(subject)}
@@ -19,6 +21,7 @@ def create_token(subject: str | Any, expires_delta: timedelta, scope: Optional[s
         to_encode.update({"scope": scope})
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
+
 
 def decode_token(token: str, scope: Optional[str] = None) -> str:
     """Decodes a JWT token and returns the subject if valid."""
@@ -36,6 +39,7 @@ def decode_token(token: str, scope: Optional[str] = None) -> str:
         raise jwt.InvalidTokenError(f"Could not validate credentials: {str(e)}")
     except Exception as e:
         raise jwt.InvalidTokenError(f"An error occurred: {str(e)}")
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verifies the password against the hashed password."""

@@ -2,8 +2,8 @@ from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from kairos.api.deps import DatabaseDep
-from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
 from kairos.core.config import settings
 from kairos.core.security import create_token, decode_token, verify_password
 from kairos.models.security import Tokens

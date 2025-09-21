@@ -1,11 +1,11 @@
-from datetime import datetime
-from typing import List, Literal, Optional
+from datetime import date, datetime
 from enum import Enum
-from kairos.models.id import PyObjectId
-from pydantic import BaseModel, Field
+from typing import List, Literal, Optional
+
 from bson import ObjectId
 from kairos.models.base import MongoModel
-from datetime import date
+from kairos.models.id import PyObjectId
+from pydantic import BaseModel, Field
 
 
 class Coordinates(BaseModel):

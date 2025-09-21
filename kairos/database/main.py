@@ -1,6 +1,6 @@
 import os
 
-from kairos.database.drivers import JourneysDriver, UsersDriver, MarkersDriver
+from kairos.database.drivers import JourneysDriver, MarkersDriver, UsersDriver
 from pymongo import AsyncMongoClient
 
 

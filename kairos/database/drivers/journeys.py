@@ -14,7 +14,6 @@ class JourneysDriver:
         """
         await self.collection.create_index([("user_id", 1)])
 
-
     async def create(self, journey: Journey) -> Journey:
 
         # Convert to dictionary

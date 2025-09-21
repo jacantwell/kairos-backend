@@ -1,7 +1,8 @@
+from typing import List
+
 from bson import ObjectId
 from kairos.models.markers import Marker
 from pymongo.asynchronous.database import AsyncDatabase
-from typing import List
 
 
 class MarkersDriver:
@@ -61,10 +62,12 @@ class MarkersDriver:
     async def get_journey_markers(self, journey_id: str) -> List[Marker]:
         """Get all markers for a journey"""
         cursor = self.collection.find({"journey_id": ObjectId(journey_id)})
-        markers =  await cursor.to_list(length=None)
+        markers = await cursor.to_list(length=None)
         return [Marker.model_validate(marker) for marker in markers]
-    
-    async def get_coordinates_nearby_journeys(self, coordinates: List[float], max_distance_meters: int = 100000) -> List[str]:
+
+    async def get_coordinates_nearby_journeys(
+        self, coordinates: List[float], max_distance_meters: int = 100000
+    ) -> List[str]:
         """
         Find journey IDs that have markers near the given coordinates
         coordinates: [longitude, latitude]
@@ -73,13 +76,10 @@ class MarkersDriver:
         pipeline = [
             {
                 "$geoNear": {
-                    "near": {
-                        "type": "Point",
-                        "coordinates": coordinates
-                    },
+                    "near": {"type": "Point", "coordinates": coordinates},
                     "distanceField": "distance",
                     "maxDistance": max_distance_meters,
-                    "spherical": True
+                    "spherical": True,
                 }
             },
             # {
@@ -91,16 +91,16 @@ class MarkersDriver:
                     "_id": "$journey_id"  # Group by journey_id to get unique journey IDs
                 }
             },
-            {
-                "$limit": 50  # Limit final journey results
-            }
+            {"$limit": 50},  # Limit final journey results
         ]
-        
-        cursor =  await self.collection.aggregate(pipeline)
+
+        cursor = await self.collection.aggregate(pipeline)
         results = await cursor.to_list(length=50)
         return [result["_id"] for result in results]
-    
-    async def get_journey_nearby_journeys(self, journey_id: str, max_distance_meters: int = 500000) -> List[str]:
+
+    async def get_journey_nearby_journeys(
+        self, journey_id: str, max_distance_meters: int = 500000
+    ) -> List[str]:
         """
         Find journey IDs that have markers near any marker in the given journey
         Returns list of journey IDs
@@ -108,20 +108,22 @@ class MarkersDriver:
         # First get all markers for the journey
         markers_cursor = self.collection.find({"journey_id": ObjectId(journey_id)})
         markers = await markers_cursor.to_list(length=None)
-        
+
         print(markers)
 
         if not markers:
             return []
-        
+
         nearby_journey_ids = set()
-        
+
         for marker in markers:
             coordinates = marker["coordinates"]["coordinates"]
-            nearby_ids = await self.get_coordinates_nearby_journeys(coordinates, max_distance_meters)
+            nearby_ids = await self.get_coordinates_nearby_journeys(
+                coordinates, max_distance_meters
+            )
             nearby_journey_ids.update(nearby_ids)
-        
+
         # Remove the original journey ID from results
         nearby_journey_ids.discard(ObjectId(journey_id))
-        
+
         return [str(jid) for jid in nearby_journey_ids]

@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import Field
-from kairos.models.id import PyObjectId
 from kairos.models.base import MongoModel
+from kairos.models.id import PyObjectId
+from pydantic import Field
 
 
 class Journey(MongoModel):

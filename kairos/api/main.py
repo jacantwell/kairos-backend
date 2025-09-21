@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from kairos.api.routes import auth_router, root_router, users_router, journeys_router
+from kairos.api.routes import auth_router, journeys_router, root_router, users_router
 from kairos.core.config import settings
 
 api_router = APIRouter()

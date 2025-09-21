@@ -1,14 +1,14 @@
+import resend
+from bson import ObjectId
 from fastapi import APIRouter, HTTPException
 from kairos.api.deps import CurrentUserDep, DatabaseDep
+from kairos.core.config import settings
 from kairos.core.security import (
-    get_password_hash,
     create_token,
     decode_token,
+    get_password_hash,
 )
 from kairos.models.users import User
-from kairos.core.config import settings
-from bson import ObjectId
-import resend
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -36,10 +36,10 @@ async def register_user(db: DatabaseDep, user: User) -> None:
     <a href="{verification_link}">Verify Email</a>
     """
     email_content: resend.Emails.SendParams = {
-    "from": "Kairos <verify@send.findkairos.com>",
-    "to": [user.email],
-    "subject": "Verify Your Email Address",
-    "html": html_content,
+        "from": "Kairos <verify@send.findkairos.com>",
+        "to": [user.email],
+        "subject": "Verify Your Email Address",
+        "html": html_content,
     }
 
     resend.Emails.send(email_content)
@@ -66,6 +66,7 @@ async def verify_email(db: DatabaseDep, token: str):
     user.is_verified = True
     await db.users.update(str(user.id), user)
 
+
 @router.post("/reset-password")
 async def reset_password(db: DatabaseDep, email: str):
     users = await db.users.query({"email": email})
@@ -77,7 +78,8 @@ async def reset_password(db: DatabaseDep, email: str):
         user = users[0]
 
     token = create_token(
-        user.email, settings.PASSWORD_RESET_TOKEN_EXPIRE_DELTA, scope="password_reset")
+        user.email, settings.PASSWORD_RESET_TOKEN_EXPIRE_DELTA, scope="password_reset"
+    )
 
     # Create email message
     verification_link = f"http://www.findkairos.com/reset-password?token={token}"
@@ -87,14 +89,15 @@ async def reset_password(db: DatabaseDep, email: str):
     """
 
     email_content: resend.Emails.SendParams = {
-    "from": "Kairos <reset@send.findkairos.com>",
-    "to": [user.email],
-    "subject": "Verify Your Email Address",
-    "html": html_content,
+        "from": "Kairos <reset@send.findkairos.com>",
+        "to": [user.email],
+        "subject": "Verify Your Email Address",
+        "html": html_content,
     }
 
     resend.Emails.send(email_content)
-    
+
+
 @router.post("/update-password")
 async def update_password(db: DatabaseDep, token: str, new_password: str):
     try:
@@ -113,12 +116,14 @@ async def update_password(db: DatabaseDep, token: str, new_password: str):
     user.password = get_password_hash(new_password)
     await db.users.update(str(user.id), user)
 
+
 @router.get("/me")
 async def get_current_user(user: CurrentUserDep) -> User:
     """
     Get the current authenticated user.
     """
     return user
+
 
 @router.get("/{user_id}")
 async def get_user_by_id(db: DatabaseDep, user: CurrentUserDep, user_id: str) -> User:
@@ -130,6 +135,7 @@ async def get_user_by_id(db: DatabaseDep, user: CurrentUserDep, user_id: str) ->
         raise HTTPException(status_code=404, detail="User not found")
     return read_user
 
+
 @router.get("/{user_id}/journeys")
 async def get_user_journeys(db: DatabaseDep, user: CurrentUserDep, user_id: str):
     """
@@ -137,6 +143,7 @@ async def get_user_journeys(db: DatabaseDep, user: CurrentUserDep, user_id: str)
     """
     journeys = await db.journeys.query({"user_id": ObjectId(user_id)})
     return journeys
+
 
 @router.get("/{user_id}/journeys/active")
 async def get_active_journey(db: DatabaseDep, user: CurrentUserDep, user_id: str):
@@ -148,8 +155,11 @@ async def get_active_journey(db: DatabaseDep, user: CurrentUserDep, user_id: str
         raise HTTPException(status_code=404, detail="No active journey found")
     return journeys[0]
 
+
 @router.put("/{user_id}")
-async def update_user(db: DatabaseDep, user: CurrentUserDep, user_id: str, updated_user: User):
+async def update_user(
+    db: DatabaseDep, user: CurrentUserDep, user_id: str, updated_user: User
+):
     """
     Update a user by ID.
     """
@@ -161,6 +171,7 @@ async def update_user(db: DatabaseDep, user: CurrentUserDep, user_id: str, updat
         raise HTTPException(status_code=400, detail="Password cannot be changed here.")
     await db.users.update(user_id, updated_user)
     return updated_user
+
 
 @router.delete("/{user_id}")
 async def delete_user(db: DatabaseDep, user: CurrentUserDep, user_id: str):

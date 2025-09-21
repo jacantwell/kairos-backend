@@ -1,10 +1,9 @@
 from typing import List
+
 from fastapi import APIRouter, HTTPException
 from kairos.api.deps import CurrentUserDep, DatabaseDep
 from kairos.models.journeys import Journey
 from kairos.models.markers import Marker
-from bson import ObjectId
-from kairos.models.id import PyObjectId
 
 router = APIRouter(prefix="/journeys", tags=["journeys"])
 
@@ -16,8 +15,10 @@ async def create_journey(
     """
     Register a new journey.
     """
-
-    journey = await db.journeys.create(journey)
+    try:
+        journey = await db.journeys.create(journey)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return journey
 
@@ -52,7 +53,10 @@ async def add_marker_to_journey(
 
     # Associate marker with the user
     marker.owner_id = user.id
-    created_marker = await db.markers.create(marker)
+    try:
+        created_marker = await db.markers.create(marker)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return created_marker
 
@@ -71,9 +75,13 @@ async def get_journey_markers(
     if not journey:
         raise HTTPException(status_code=404, detail="Journey not found")
 
-    markers = await db.markers.get_journey_markers(journey_id)
+    try:
+        markers = await db.markers.get_journey_markers(journey_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return markers
+
 
 @router.delete("/{journey_id}/markers/{marker_id}")
 async def delete_journey_marker(
@@ -90,7 +98,11 @@ async def delete_journey_marker(
     if not journey:
         raise HTTPException(status_code=404, detail="Journey not found")
 
-    await db.markers.delete(marker_id)
+    try:
+        await db.markers.delete(marker_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 
 @router.get("/{journey_id}/journeys/nearby")
 async def get_nearby_journeys(
@@ -110,7 +122,10 @@ async def get_nearby_journeys(
     #     raise HTTPException(status_code=403, detail="Access denied")
 
     # Get journeys
-    journeys = await db.markers.get_journey_nearby_journeys(journey_id)
+    try:
+        journeys = await db.markers.get_journey_nearby_journeys(journey_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
     return journeys
 
@@ -119,7 +134,10 @@ async def get_nearby_journeys(
 async def delete_journey(
     db: DatabaseDep, user: CurrentUserDep, journey_id: str
 ) -> None:
-    await db.journeys.delete(journey_id)
+    try:
+        await db.journeys.delete(journey_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.patch("/{journey_id}/active")
@@ -131,7 +149,10 @@ async def toggle_active_journey(
     # TOTHINK should there be validation of only 1 active journey here?
     journey = await db.journeys.read(journey_id)
     journey.active = not journey.active
-    await db.journeys.update(journey_id, journey)
+    try:
+        await db.journeys.update(journey_id, journey)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.patch("/{journey_id}")
@@ -143,4 +164,35 @@ async def set_completed_journey(db: DatabaseDep, user: CurrentUserDep, journey_i
     journey = await db.journeys.read(journey_id)
     journey.active = False
     journey.completed = True
-    await db.journeys.update(journey_id, journey)
+    try:
+        await db.journeys.update(journey_id, journey)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.put("/{journey_id}/markers/{marker_id}")
+async def update_journey_marker(
+    db: DatabaseDep,
+    user: CurrentUserDep,
+    journey_id: str,
+    marker_id: str,
+    marker: Marker,
+) -> None:
+    """
+    Update a marker in a journey.
+    """
+    # Ensure the journey exists
+    journey = await db.journeys.read(journey_id)
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
+
+    existing_marker = await db.markers.read(marker_id)
+    if not existing_marker:
+        raise HTTPException(status_code=404, detail="Marker not found")
+
+    marker.id = existing_marker.id
+    marker.owner_id = existing_marker.owner_id
+    try:
+        await db.markers.update(marker_id, marker)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

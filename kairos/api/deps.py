@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import Depends, Request, status
 from fastapi.exceptions import HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jwt.exceptions import InvalidTokenError, ExpiredSignatureError
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 from kairos.core.config import settings
 from kairos.core.security import decode_token
 from kairos.database import Database

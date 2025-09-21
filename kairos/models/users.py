@@ -1,8 +1,8 @@
 from typing import Optional
 
+from kairos.models.base import MongoModel
 from kairos.models.id import PyObjectId
 from pydantic import BaseModel, Field
-from kairos.models.base import MongoModel
 
 
 class User(MongoModel):
