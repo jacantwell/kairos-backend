@@ -54,3 +54,7 @@ class JourneysDriver:
     async def delete(self, id: str) -> None:
 
         await self.collection.delete_one({"_id": ObjectId(id)})
+
+    async def delete_user_journeys(self, user_id: str) -> None:
+        """Delete all journeys for a user"""
+        await self.collection.delete_many({"user_id": ObjectId(user_id)})

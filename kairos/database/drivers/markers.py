@@ -64,6 +64,14 @@ class MarkersDriver:
         cursor = self.collection.find({"journey_id": ObjectId(journey_id)})
         markers = await cursor.to_list(length=None)
         return [Marker.model_validate(marker) for marker in markers]
+    
+    async def delete_journey_markers(self, journey_id: str) -> None:
+        """Delete all markers for a journey"""
+        await self.collection.delete_many({"journey_id": ObjectId(journey_id)})
+
+    async def delete_user_markers(self, user_id: str) -> None:
+        """Delete all markers for a user"""
+        await self.collection.delete_many({"owner_id": ObjectId(user_id)})
 
     async def get_coordinates_nearby_journeys(
         self, coordinates: List[float], max_distance_meters: int = 100000
@@ -108,8 +116,6 @@ class MarkersDriver:
         # First get all markers for the journey
         markers_cursor = self.collection.find({"journey_id": ObjectId(journey_id)})
         markers = await markers_cursor.to_list(length=None)
-
-        print(markers)
 
         if not markers:
             return []

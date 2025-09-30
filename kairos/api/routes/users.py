@@ -1,4 +1,5 @@
 import resend
+import asyncio
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException
 from kairos.api.deps import CurrentUserDep, DatabaseDep
@@ -181,5 +182,9 @@ async def delete_user(db: DatabaseDep, user: CurrentUserDep, user_id: str):
     read_user = await db.users.read(user_id)
     if not read_user:
         raise HTTPException(status_code=404, detail="User not found")
-    await db.users.delete(user_id)
+    await asyncio.gather(
+        db.users.delete(user_id),
+        db.journeys.delete_user_journeys(user_id),
+        db.markers.delete_user_markers(user_id),
+    )
     return {"message": "User deleted successfully."}
