@@ -147,8 +147,30 @@ async def toggle_active_journey(
     # This is a the most basic implementation
     # TODO use a pipeline to just switch the bool
     # TOTHINK should there be validation of only 1 active journey here?
+
+    user_active_journeys = await db.journeys.query({"user_id": user.id, "active": True})
+
+    if len(user_active_journeys) == 1:
+        active_journey = user_active_journeys[0]
+        # If the chosen journey is the active one, just toggle it and exit
+        if str(active_journey.id) == journey_id:
+            active_journey.active = not active_journey.active
+            try:
+                await db.journeys.update(journey_id, active_journey)
+                return
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=str(e))
+        else:
+            # There is already an active journey, so we need to deactivate it
+            active_journey.active = False
+            try:
+                await db.journeys.update(str(active_journey.id), active_journey)
+            except Exception as e:
+                raise HTTPException(status_code=400, detail=str(e))
+    
+    # Now activate the chosen journey
     journey = await db.journeys.read(journey_id)
-    journey.active = not journey.active
+    journey.active = True
     try:
         await db.journeys.update(journey_id, journey)
     except Exception as e:
