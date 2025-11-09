@@ -25,7 +25,7 @@ async def login(
         data: OAuth2 password request form containing username (email) and password.
 
     Raises:
-        HTTPException: 400 if username or password is incorrect.
+        HTTPException: 401 if username or password is incorrect.
 
     Returns:
         Tokens: Object containing access_token and refresh_token.
@@ -33,12 +33,12 @@ async def login(
     found_users = await db.users.query({"email": data.username})
 
     if len(found_users) == 0:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
     else:
         user = found_users[0]
 
     if not verify_password(data.password, user.password):
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
 
     access_token = create_token(
         subject=user.id,
