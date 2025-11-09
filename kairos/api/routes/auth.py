@@ -66,7 +66,7 @@ async def refresh(refresh_token: str) -> Tokens:
         refresh_token: Valid JWT refresh token.
 
     Raises:
-        HTTPException: 400 if refresh token has expired.
+        HTTPException: 401 if refresh token has expired.
         HTTPException: 403 if refresh token is invalid.
 
     Returns:
@@ -79,7 +79,7 @@ async def refresh(refresh_token: str) -> Tokens:
     try:
         sub = decode_token(refresh_token, scope="refresh")
     except ExpiredSignatureError:
-        raise HTTPException(status_code=400, detail="Refresh token has expired")
+        raise HTTPException(status_code=401, detail="Refresh token has expired")
     except Exception as e:
         raise HTTPException(status_code=403, detail="Invalid refresh token")
     new_access = create_token(
