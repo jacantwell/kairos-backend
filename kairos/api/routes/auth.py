@@ -11,12 +11,24 @@ from kairos.models.security import Tokens
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
 
-@router.post("/token")
+@router.post("/token", response_model=Tokens)
 async def login(
     db: DatabaseDep, data: Annotated[OAuth2PasswordRequestForm, Depends()]
 ) -> Tokens:
-    """
-    Authenticate a user via their password and return an access token adn refresh token.
+    """Authenticate a user and return access and refresh tokens.
+
+    Validates user credentials and generates JWT access and refresh tokens
+    for authenticated sessions.
+
+    Args:
+        db: Database dependency for accessing data stores.
+        data: OAuth2 password request form containing username (email) and password.
+
+    Raises:
+        HTTPException: 400 if username or password is incorrect.
+
+    Returns:
+        Tokens: Object containing access_token and refresh_token.
     """
     found_users = await db.users.query({"email": data.username})
 
@@ -43,8 +55,27 @@ async def login(
     return Tokens(access_token=access_token, refresh_token=refresh_token)
 
 
-@router.post("/refresh")
-async def refresh(refresh_token: str):
+@router.post("/refresh", response_model=Tokens)
+async def refresh(refresh_token: str) -> Tokens:
+    """Refresh an access token using a refresh token.
+
+    Validates a refresh token and generates a new access token. The same refresh
+    token is returned for continued use.
+
+    Args:
+        refresh_token: Valid JWT refresh token.
+
+    Raises:
+        HTTPException: 401 if refresh token has expired.
+        HTTPException: 403 if refresh token is invalid.
+
+    Returns:
+        Tokens: Object containing new access_token and the same refresh_token.
+
+    Note:
+        TODO: Add logic for refresh token rotation for improved security.
+        This requires maintaining a record of blacklisted refresh tokens.
+    """
     try:
         sub = decode_token(refresh_token, scope="refresh")
     except ExpiredSignatureError:
