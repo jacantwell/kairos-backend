@@ -37,7 +37,7 @@ async def create_journey(
     try:
         journey = await db.journeys.create(journey)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to create journey: {str(e)}")
 
     return journey
 
@@ -102,7 +102,7 @@ async def add_marker_to_journey(
     try:
         created_marker = await db.markers.create(marker)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to create marker: {str(e)}")
 
     return created_marker
 
@@ -137,7 +137,7 @@ async def get_journey_markers(
     try:
         markers = await db.markers.get_journey_markers(journey_id)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve markers: {str(e)}")
 
     return markers
 
@@ -174,7 +174,7 @@ async def delete_journey_marker(
     try:
         await db.markers.delete(marker_id)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to delete marker: {str(e)}")
 
 
 @router.get("/{journey_id}/journeys/nearby", response_model=List[Journey])
@@ -212,7 +212,7 @@ async def get_nearby_journeys(
     try:
         journeys = await db.markers.get_journey_nearby_journeys(journey_id)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve nearby journeys: {str(e)}")
 
     return journeys
 
@@ -231,15 +231,21 @@ async def delete_journey(
         journey_id: Unique identifier of the journey to delete.
 
     Raises:
-        HTTPException: 400 if deletion fails.
+        HTTPException: 404 if journey is not found.
+        HTTPException: 500 if deletion fails.
 
     Returns:
         None
     """
+    # Check if journey exists before deletion
+    journey = await db.journeys.read(journey_id)
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
+
     try:
         await db.journeys.delete(journey_id)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to delete journey: {str(e)}")
 
 
 @router.patch("/{journey_id}/active", status_code=204, response_model=None)
@@ -278,22 +284,24 @@ async def toggle_active_journey(
                 await db.journeys.update(journey_id, active_journey)
                 return
             except Exception as e:
-                raise HTTPException(status_code=400, detail=str(e))
+                raise HTTPException(status_code=500, detail=f"Failed to update journey: {str(e)}")
         else:
             # There is already an active journey, so we need to deactivate it
             active_journey.active = False
             try:
                 await db.journeys.update(str(active_journey.id), active_journey)
             except Exception as e:
-                raise HTTPException(status_code=400, detail=str(e))
+                raise HTTPException(status_code=500, detail=f"Failed to deactivate journey: {str(e)}")
 
     # Now activate the chosen journey
     journey = await db.journeys.read(journey_id)
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
     journey.active = True
     try:
         await db.journeys.update(journey_id, journey)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to activate journey: {str(e)}")
 
 
 @router.patch("/{journey_id}", status_code=204, response_model=None)
@@ -309,18 +317,21 @@ async def set_completed_journey(db: DatabaseDep, user: CurrentUserDep, journey_i
         journey_id: Unique identifier of the journey to mark as completed.
 
     Raises:
-        HTTPException: 400 if update fails.
+        HTTPException: 404 if journey is not found.
+        HTTPException: 500 if update fails.
 
     Returns:
         None
     """
     journey = await db.journeys.read(journey_id)
+    if not journey:
+        raise HTTPException(status_code=404, detail="Journey not found")
     journey.active = False
     journey.completed = True
     try:
         await db.journeys.update(journey_id, journey)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to complete journey: {str(e)}")
 
 
 @router.put("/{journey_id}/markers/{marker_id}", response_model=Marker)
@@ -364,6 +375,6 @@ async def update_journey_marker(
     try:
         await db.markers.update(marker_id, marker)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Failed to update marker: {str(e)}")
 
     return marker

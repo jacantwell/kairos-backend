@@ -44,7 +44,10 @@ async def register_user(db: DatabaseDep, user: User) -> None:
     if existing_users:
         raise HTTPException(status_code=400, detail="Email already registered")
     user.password = get_password_hash(user.password)
-    await db.users.create(user)
+    try:
+        await db.users.create(user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create user: {str(e)}")
 
     # Generate verification token
     token = create_token(
@@ -64,7 +67,12 @@ async def register_user(db: DatabaseDep, user: User) -> None:
         "html": html_content,
     }
 
-    resend.Emails.send(email_content)
+    try:
+        resend.Emails.send(email_content)
+    except Exception as e:
+        # Email sending failed, but user is already created
+        # Log error but don't fail the registration
+        pass
 
 
 @router.get("/verify-email", response_model=MessageResponse)
@@ -79,7 +87,8 @@ async def verify_email(db: DatabaseDep, token: str) -> MessageResponse:
 
     Raises:
         HTTPException: 400 if token is invalid or expired.
-        HTTPException: 404 if user is not found or multiple users found.
+        HTTPException: 404 if user is not found.
+        HTTPException: 500 if multiple users found (data integrity error).
 
     Returns:
         MessageResponse: Confirmation message of verification status.
@@ -91,7 +100,7 @@ async def verify_email(db: DatabaseDep, token: str) -> MessageResponse:
 
     users = await db.users.query({"email": email})
     if len(users) > 1:
-        raise HTTPException(status_code=404, detail="Multiple users found")
+        raise HTTPException(status_code=500, detail="Data integrity error: Multiple users found")
     if len(users) == 0:
         raise HTTPException(status_code=404, detail="User not found")
     else:
@@ -101,7 +110,10 @@ async def verify_email(db: DatabaseDep, token: str) -> MessageResponse:
         return MessageResponse(message="Email already verified.")
 
     user.is_verified = True
-    await db.users.update(str(user.id), user)
+    try:
+        await db.users.update(str(user.id), user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to verify email: {str(e)}")
     return MessageResponse(message="Email verified successfully.")
 
 
@@ -117,14 +129,14 @@ async def reset_password(db: DatabaseDep, email: str) -> None:
         email: Email address of the user requesting password reset.
 
     Raises:
-        HTTPException: 404 if multiple users found with the same email.
+        HTTPException: 500 if multiple users found with the same email (data integrity error).
 
     Returns:
         None
     """
     users = await db.users.query({"email": email})
     if len(users) > 1:
-        raise HTTPException(status_code=404, detail="Multiple users found")
+        raise HTTPException(status_code=500, detail="Data integrity error: Multiple users found")
     elif len(users) == 0:
         return
     else:
@@ -148,7 +160,12 @@ async def reset_password(db: DatabaseDep, email: str) -> None:
         "html": html_content,
     }
 
-    resend.Emails.send(email_content)
+    try:
+        resend.Emails.send(email_content)
+    except Exception as e:
+        # Email sending failed, but we don't want to expose this to the user
+        # for security reasons (prevents user enumeration)
+        pass
 
 
 @router.post("/update-password", response_model=MessageResponse)
@@ -176,14 +193,17 @@ async def update_password(db: DatabaseDep, token: str, new_password: str) -> Mes
 
     users = await db.users.query({"email": email})
     if len(users) > 1:
-        raise HTTPException(status_code=404, detail="Multiple users found")
+        raise HTTPException(status_code=500, detail="Data integrity error: Multiple users found")
     if len(users) == 0:
         raise HTTPException(status_code=404, detail="User not found")
     else:
         user = users[0]
 
     user.password = get_password_hash(new_password)
-    await db.users.update(str(user.id), user)
+    try:
+        await db.users.update(str(user.id), user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update password: {str(e)}")
     return MessageResponse(message="Password updated successfully.")
 
 
@@ -236,10 +256,22 @@ async def get_user_journeys(db: DatabaseDep, user: CurrentUserDep, user_id: str)
         user: Current authenticated user from dependency injection.
         user_id: Unique identifier of the user whose journeys to retrieve.
 
+    Raises:
+        HTTPException: 400 if user_id is invalid.
+        HTTPException: 500 if database query fails.
+
     Returns:
         List[Journey]: List of all journeys belonging to the user.
     """
-    journeys = await db.journeys.query({"user_id": ObjectId(user_id)})
+    try:
+        object_id = ObjectId(user_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    try:
+        journeys = await db.journeys.query({"user_id": object_id})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve journeys: {str(e)}")
     return journeys
 
 
@@ -255,12 +287,23 @@ async def get_active_journey(db: DatabaseDep, user: CurrentUserDep, user_id: str
         user_id: Unique identifier of the user whose active journey to retrieve.
 
     Raises:
+        HTTPException: 400 if user_id is invalid.
         HTTPException: 404 if no active journey is found.
+        HTTPException: 500 if database query fails.
 
     Returns:
         Journey: The user's currently active journey.
     """
-    journeys = await db.journeys.query({"user_id": ObjectId(user_id), "active": True})
+    try:
+        object_id = ObjectId(user_id)
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Invalid user ID format")
+
+    try:
+        journeys = await db.journeys.query({"user_id": object_id, "active": True})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve active journey: {str(e)}")
+
     if not journeys:
         raise HTTPException(status_code=404, detail="No active journey found")
     return journeys[0]
@@ -294,7 +337,10 @@ async def update_user(
     updated_user.id = read_user.id  # Ensure the ID remains the same
     if updated_user.password != read_user.password:
         raise HTTPException(status_code=400, detail="Password cannot be changed here.")
-    await db.users.update(user_id, updated_user)
+    try:
+        await db.users.update(user_id, updated_user)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to update user: {str(e)}")
     return updated_user
 
 
@@ -319,9 +365,12 @@ async def delete_user(db: DatabaseDep, user: CurrentUserDep, user_id: str) -> Me
     read_user = await db.users.read(user_id)
     if not read_user:
         raise HTTPException(status_code=404, detail="User not found")
-    await asyncio.gather(
-        db.users.delete(user_id),
-        db.journeys.delete_user_journeys(user_id),
-        db.markers.delete_user_markers(user_id),
-    )
+    try:
+        await asyncio.gather(
+            db.users.delete(user_id),
+            db.journeys.delete_user_journeys(user_id),
+            db.markers.delete_user_markers(user_id),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to delete user: {str(e)}")
     return MessageResponse(message="User deleted successfully.")
