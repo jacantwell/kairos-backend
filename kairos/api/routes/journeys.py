@@ -177,12 +177,12 @@ async def delete_journey_marker(
         raise HTTPException(status_code=500, detail=f"Failed to delete marker: {str(e)}")
 
 
-@router.get("/{journey_id}/journeys/nearby", response_model=List[Journey])
+@router.get("/{journey_id}/journeys/nearby", response_model=List[str])
 async def get_nearby_journeys(
     db: DatabaseDep,
     user: CurrentUserDep,
     journey_id: str,
-) -> List[Journey]:
+) -> List[str]:
     """Get all journeys with markers near the markers of a given journey.
 
     Retrieves journeys that have markers geographically close to the markers
